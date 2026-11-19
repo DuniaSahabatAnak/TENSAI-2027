@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TENSAI 2027 – Pendaftaran</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header><div class="w bar">
+  <a class="logo" href="#home">TEN<b>SAI</b></a>
+  <button class="menu" id="menu" aria-label="Buka menu">Menu</button>
+  <nav id="nav">
+    <a href="#home" data-r="home">Home</a><a href="#competition" data-r="competition">Perlombaan</a><a href="#guide" data-r="guide">Panduan</a><a href="#terms" data-r="terms">Syarat &amp; Ketentuan</a><a href="#invitation" data-r="invitation">Undangan</a>
+  </nav>
+  <div class="right" id="right"></div>
+</div></header>
+<main><div class="w" id="app"></div></main>
+<footer><div class="w"><span>Copyright © 2027 TENSAI · SMA Negeri 10 Padang · <a href="#terms">Terms of Service</a></span><a href="https://example.com/pengumuman" target="_blank" rel="noopener">Download Pengumuman Hasil</a></div></footer>
+
+<dialog id="dBayar">
+  <h2 style="font-size:1.3rem">Pembayaran</h2>
+  <p class="mu" style="margin-top:6px">No. <b id="bNo"></b><br><span id="bInfo"></span><br>Total tagihan: <b id="bTotal"></b></p>
+  <div class="fld" style="margin-top:12px"><label for="bMet">Metode pembayaran</label><select id="bMet"><option value="transfer">Transfer bank</option><option value="tunai">Tunai di sekretariat</option></select></div>
+  <div class="pay" id="bTr"><b>Bank Contoh</b> · 1234 5678 90<br>a/n Panitia TENSAI SMAN 10 Padang <button class="btn out sm" type="button" id="salin">Salin</button></div>
+  <div class="pay" id="bTu" style="display:none">Bayar langsung di sekretariat panitia pada jam kerja. Setelah dibayar, panitia memverifikasi pendaftaranmu.</div>
+  <div class="fld" id="bUp"><label for="bFile">Bukti transfer (JPG/PNG, maks. 1 MB)</label><input id="bFile" type="file" accept="image/png,image/jpeg"><img id="prev" alt="Pratinjau bukti"></div>
+  <div class="msg" id="bMsg"></div>
+  <div class="row"><button class="btn" id="bOk">Konfirmasi pembayaran</button><button class="btn out" onclick="dBayar.close()">Nanti</button></div>
+</dialog>
+<dialog id="dReg">
+  <h2 style="font-size:1.3rem">Pendaftaran Lomba</h2>
+  <form id="fDL" style="margin-top:12px">
+    <div class="fld"><label for="dlSek">Asal sekolah</label><input id="dlSek" list="dlSekList" required placeholder="Ketik untuk mencari sekolah"><datalist id="dlSekList"></datalist><div class="hint">Nggak ketemu sekolahmu? Ketik manual saja.</div></div>
+    <div class="fld"><label for="dlLomba">Lomba</label><select id="dlLomba" required></select></div>
+    <div class="fld"><label for="dlNama">Nama</label><input id="dlNama" required></div>
+    <div class="fld"><label for="dlNisn">NISN</label><input id="dlNisn" inputmode="numeric" pattern="\d{10}" maxlength="10" required><div class="hint">10 digit angka.</div></div>
+    <div class="fld"><label for="dlJk">Jenis kelamin</label><select id="dlJk" required><option value="">Pilih</option><option>Laki-Laki</option><option>Perempuan</option></select></div>
+    <div class="fld"><label for="dlLahir">Tanggal lahir</label><input id="dlLahir" type="date" required></div>
+    <div class="fld"><label for="dlHp">Nomor HP</label><input id="dlHp" type="tel" required></div>
+    <p class="hint"><b>Syarat dan Ketentuan:</b> dengan menekan tombol "Simpan", saya menyatakan bahwa data yang saya isi benar dan saya setuju mengikuti semua aturan. Saya bertanggung jawab atas keakuratan data tersebut.</p>
+    <div class="msg" id="dlMsg"></div>
+    <div class="row"><button class="btn">Simpan</button><button class="btn out" type="button" onclick="dReg.close()">Batal</button></div>
+  </form>
+</dialog>
+<dialog id="dImg"><img id="bImg" alt="Bukti" style="max-width:100%;border-radius:8px"><div class="row"><button class="btn out" onclick="dImg.close()">Tutup</button></div></dialog>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/firebase.js"></script>
+<script src="js/pages.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    // Admin = punya dokumen admins/{uid}. Dokumen itu hanya bisa dibuat lewat Firebase Console, tidak lewat aplikasi.
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+
+    match /admins/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Profil peserta. Tidak ada field "role", jadi peserta tidak bisa menjadikan dirinya admin.
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['nama','email','wa','sekolah']);
+    }
+
+    // Penghitung nomor urut dan kuota per lomba. Publik dibaca (hanya angka).
+    match /counters/{lid} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.keys().hasOnly(['seq','aktif'])
+        && request.resource.data.seq == 1 && request.resource.data.aktif == 1;
+      allow update: if isAdmin() || (signedIn() && request.resource.data.keys().hasOnly(['seq','aktif'])
+        && request.resource.data.seq == resource.data.seq + 1
+        && request.resource.data.aktif == resource.data.aktif + 1);
+    }
+
+    // Kunci agar satu NISN tidak bisa terdaftar dua kali di lomba yang sama.
+    match /nisnLocks/{lockId} {
+      allow get: if signedIn();
+      allow create: if signedIn() && lockId.matches('^[A-Z]+_[0-9]{10}$')
+        && request.resource.data.keys().hasOnly(['uid']) && request.resource.data.uid == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    match /registrations/{no} {
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid','email','no','lid','lomba','nama','nisn','sekolah','jk','lahir','hp','total','status','hasBukti','createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.no == no
+        && request.resource.data.status == 'belum'
+        && request.resource.data.hasBukti == false
+        && request.resource.data.total is int && request.resource.data.total > 0
+        && request.resource.data.createdAt == request.time
+        && (!('nisn' in request.resource.data) || request.resource.data.nisn.matches('^[0-9]{10}$'));
+      // Peserta hanya boleh mengirim pembayaran (belum -> menunggu). Mengubah ke "lunas" hanya admin.
+      allow update: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid
+        && resource.data.status == 'belum'
+        && request.resource.data.status == 'menunggu'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','metode','hasBukti'])
+        && request.resource.data.metode in ['transfer','tunai']);
+      allow delete: if isAdmin();
+    }
+
+    // Bukti transfer (gambar base64 terkompres). Hanya pemilik dan admin yang bisa membaca.
+    match /bukti/{no} {
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create, update: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid','data'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.data is string && request.resource.data.data.size() < 900000
+        && get(/databases/$(database)/documents/registrations/$(no)).data.uid == request.auth.uid
+        && get(/databases/$(database)/documents/registrations/$(no)).data.status == 'belum';
+      allow delete: if isAdmin();
+    }
+  }
+}

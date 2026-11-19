@@ -40,3 +40,4 @@ CATATAN KEAMANAN
 - Bukti transfer disimpan sebagai gambar terkompres di Firestore (tanpa Firebase Storage, supaya
   cukup dengan paket gratis Spark). Jika nanti ingin file asli, pindahkan ke Firebase Storage.
 - Ganti nomor rekening dan data contoh di index.html dan js/config.js sebelum dipakai.
+GitHub Pages deployment update
